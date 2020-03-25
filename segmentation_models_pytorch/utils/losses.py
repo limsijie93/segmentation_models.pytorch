@@ -16,7 +16,7 @@ class JaccardLoss(base.Loss):
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr[0])
         return 1 - F.jaccard(
-            y_pr[0], y_gt[0],
+            y_pr, y_gt,
             eps=self.eps,
             threshold=None,
             ignore_channels=self.ignore_channels,
@@ -35,7 +35,7 @@ class DiceLoss(base.Loss):
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr[0])
         return 1 - F.f_score(
-            y_pr[0], y_gt[0],
+            y_pr, y_gt,
             beta=self.beta,
             eps=self.eps,
             threshold=None,
@@ -52,7 +52,16 @@ class MSELoss(nn.MSELoss, base.Loss):
 
 
 class CrossEntropyLoss(nn.CrossEntropyLoss, base.Loss):
-    pass
+    def __init__(self, eps=1e-4, weight=None, activation=None, ignore_channels=None, **kwargs):
+        super().__init__(**kwargs)
+        self.eps = eps
+        self.weight = weight
+        self.activation = Activation(activation)
+        self.ignore_channels = ignore_channels
+
+    def forward(self, y_pr, y_gt):
+        y_pr = self.activation(y_pr[0])
+        return nn.functional.cross_entropy(y_pr, y_gt, self.weight)
 
 
 class NLLLoss(nn.NLLLoss, base.Loss):
@@ -60,8 +69,26 @@ class NLLLoss(nn.NLLLoss, base.Loss):
 
 
 class BCELoss(nn.BCELoss, base.Loss):
-    pass
+    def __init__(self, eps=1e-4, weight=None, activation=None, ignore_channels=None, **kwargs):
+        super().__init__(**kwargs)
+        self.eps = eps
+        self.weight = weight
+        self.activation = Activation(activation)
+        self.ignore_channels = ignore_channels
+
+    def forward(self, y_pr, y_gt):
+        y_pr = self.activation(y_pr[0])
+        return nn.functional.binary_cross_entropy(y_pr, y_gt, self.weight)
 
 
 class BCEWithLogitsLoss(nn.BCEWithLogitsLoss, base.Loss):
-    pass
+    def __init__(self, eps=1e-4, weight=None, activation=None, ignore_channels=None, **kwargs):
+        super().__init__(**kwargs)
+        self.eps = eps
+        self.weight = weight
+        self.activation = Activation(activation)
+        self.ignore_channels = ignore_channels
+
+    def forward(self, y_pr, y_gt):
+        y_pr = self.activation(y_pr[0])
+        return nn.functional.binary_cross_entropy_with_logits(y_pr, y_gt, self.weight)
