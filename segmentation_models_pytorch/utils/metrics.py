@@ -14,9 +14,9 @@ class IoU(base.Metric):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        y_pr = self.activation(y_pr)
+        y_pr = self.activation(y_pr[0])
         return F.iou(
-            y_pr, y_gt,
+            y_pr[0], y_gt[0],
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
@@ -24,6 +24,7 @@ class IoU(base.Metric):
 
 
 class Fscore(base.Metric):
+    __name__ = 'f_score'
 
     def __init__(self, beta=1, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
@@ -34,9 +35,9 @@ class Fscore(base.Metric):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        y_pr = self.activation(y_pr)
+        y_pr = self.activation(y_pr[0])
         return F.f_score(
-            y_pr, y_gt,
+            y_pr[0], y_gt[0],
             eps=self.eps,
             beta=self.beta,
             threshold=self.threshold,
@@ -45,6 +46,7 @@ class Fscore(base.Metric):
 
 
 class Accuracy(base.Metric):
+    __name__ = 'accuracy'
 
     def __init__(self, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
@@ -53,15 +55,16 @@ class Accuracy(base.Metric):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        y_pr = self.activation(y_pr)
+        y_pr = self.activation(y_pr[0])
         return F.accuracy(
-            y_pr, y_gt,
+            y_pr[0], y_gt[0],
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
         )
 
 
 class Recall(base.Metric):
+    __name__ = 'recall'
 
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
@@ -71,9 +74,9 @@ class Recall(base.Metric):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        y_pr = self.activation(y_pr)
+        y_pr = self.activation(y_pr[0])
         return F.recall(
-            y_pr, y_gt,
+            y_pr[0], y_gt[0],
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
@@ -81,6 +84,7 @@ class Recall(base.Metric):
 
 
 class Precision(base.Metric):
+    __name__ = 'precision'
 
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
@@ -90,9 +94,9 @@ class Precision(base.Metric):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        y_pr = self.activation(y_pr)
+        y_pr = self.activation(y_pr[0])
         return F.precision(
-            y_pr, y_gt,
+            y_pr[0], y_gt[0],
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,

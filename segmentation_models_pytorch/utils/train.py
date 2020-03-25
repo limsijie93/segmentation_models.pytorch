@@ -68,7 +68,7 @@ class Epoch:
 
 class TrainEpoch(Epoch):
 
-    def __init__(self, model, loss, metrics, optimizer, device='cpu', verbose=True):
+    def __init__(self, model, loss, metrics, optimizer, scheduler=None, device='cpu', verbose=True):
         super().__init__(
             model=model,
             loss=loss,
@@ -78,11 +78,14 @@ class TrainEpoch(Epoch):
             verbose=verbose,
         )
         self.optimizer = optimizer
+        self.scheduler = scheduler
 
     def on_epoch_start(self):
         self.model.train()
 
     def batch_update(self, x, y):
+        if self.scheduler is not None:
+            self.scheduler.step()
         self.optimizer.zero_grad()
         prediction = self.model.forward(x)
         loss = self.loss(prediction, y)
