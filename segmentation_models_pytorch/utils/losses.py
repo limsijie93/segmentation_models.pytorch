@@ -103,10 +103,11 @@ class NLLLoss(nn.NLLLoss, base.Loss):
 
 
 class BCELoss(base.Loss):
-    def __init__(self, eps=1e-4, weight=None, activation=None, ignore_channels=None, **kwargs):
+    def __init__(self, eps=1e-4, weight=None, activation=None, threshold=0.5, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
         self.weight = weight
+        self.threshold = threshold
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
 
@@ -115,7 +116,8 @@ class BCELoss(base.Loss):
             y_pr = self.activation(y_pr)
         except:
             y_pr = self.activation(y_pr[0])
-        
+
+        y_pr = F._threshold(y_pr, threshold=threshold)
         bce_loss = nn.functional.binary_cross_entropy(y_pr[0], y_gt, self.weight)
         return bce_loss
 
