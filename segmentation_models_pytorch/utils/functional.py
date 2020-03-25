@@ -80,7 +80,14 @@ def categorical_focal_loss(pr, gt, beta=1, eps=1e-7, gamma=2.0, alpha=0.25, clas
     pr = _threshold(pr, threshold=threshold)
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    loss = - gt * (alpha * (1 - pr).pow(gamma)) * torch.log(pr) #TODO
+    #loss = - gt * (alpha * (1 - pr).pow(gamma)) * torch.log(pr) #TODO
+    if self.logits:
+        BCE_loss = torch.nn.functional.binary_cross_entropy_with_logits(pr, gt, reduce=False)
+    else:
+        BCE_loss = torch.nn.functional.binary_cross_entropy(pr, gt, reduce=False)
+
+    pr = torch.exp(-BCE_loss)
+    F_loss = self.alpha * (1-pr)**self.gamma * BCE_loss
 
     return loss
 
