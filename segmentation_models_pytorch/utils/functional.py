@@ -63,6 +63,26 @@ def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None):
 
     return score
 
+def categorical_focal_loss(pr, gt, beta=1, eps=1e-7, gamma=2.0, alpha=0.25, class_indexes=None, threshold=None, ignore_channels=None):
+    """
+    Implementation of Focal Loss from the paper in multiclass classification
+    Formula:
+        loss = - gt * alpha * ((1 - pr)^gamma) * log(pr)
+    Args:
+        pr: prediction 4D torch tensor (N, C, H, W)
+        gt: ground truth 4D torch tensor (N, C, H, W)
+        alpha: the same as weighting factor in balanced cross entropy, default 0.25
+        gamma: focusing parameter for modulating factor (1-p), default 2.0
+        class_indexes: Optional integer or list of integers, classes to consider, if ``None`` all classes are used.
+
+    """
+
+    pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
+
+    loss = - gt * (alpha * (1 - pr).pow(gamma)) * torch.log(pr) #TODO
+
+    return loss
 
 def accuracy(pr, gt, threshold=0.5, ignore_channels=None):
     """Calculate accuracy score between ground truth and prediction
