@@ -14,13 +14,21 @@ class JaccardLoss(base.Loss):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        y_pr = self.activation(y_pr[0])
-        return 1 - F.jaccard(
+        try:
+            y_pr = self.activation(y_pr)
+        except:
+            y_pr = self.activation(y_pr[0])
+        
+        jaccard_score = F.jaccard(
             y_pr, y_gt,
             eps=self.eps,
             threshold=None,
             ignore_channels=self.ignore_channels,
         )
+
+        assert jaccard_score >= 0, 'Theres something wrong with your jaccard loss'
+
+        return 1 - jaccard_score
 
 
 class DiceLoss(base.Loss):
@@ -33,14 +41,22 @@ class DiceLoss(base.Loss):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        y_pr = self.activation(y_pr[0])
-        return 1 - F.f_score(
+        try:
+            y_pr = self.activation(y_pr)
+        except:
+            y_pr = self.activation(y_pr[0])
+        
+        f1_score = F.f_score(
             y_pr, y_gt,
             beta=self.beta,
             eps=self.eps,
             threshold=None,
             ignore_channels=self.ignore_channels,
         )
+
+        assert f1_score >= 0, 'Theres something wrong with your dice loss'
+
+        return 1 - f1_score
 
 
 class L1Loss(nn.L1Loss, base.Loss):
@@ -86,19 +102,22 @@ class NLLLoss(nn.NLLLoss, base.Loss):
     pass
 
 
-class BCELoss(nn.BCELoss, base.Loss):
-    pass
-    #def __init__(self, eps=1e-4, weight=None, activation=None, ignore_channels=None, **kwargs):
-        #super().__init__(**kwargs)
-        #self.eps = eps
-        #self.weight = weight
-        #self.activation = Activation(activation)
-        #self.ignore_channels = ignore_channels
+class BCELoss(base.Loss):
+    def __init__(self, eps=1e-4, weight=None, activation=None, ignore_channels=None, **kwargs):
+        super().__init__(**kwargs)
+        self.eps = eps
+        self.weight = weight
+        self.activation = Activation(activation)
+        self.ignore_channels = ignore_channels
 
-    #def forward(self, y_pr, y_gt):
-        #y_pr = self.activation(y_pr[0])
-        #bce_loss = nn.functional.binary_cross_entropy(y_pr, y_gt, self.weight)
-        #return torch.mean(bce_loss)
+    def forward(self, y_pr, y_gt):
+        try:
+            y_pr = self.activation(y_pr)
+        except:
+            y_pr = self.activation(y_pr[0])
+        
+        bce_loss = nn.functional.binary_cross_entropy(y_pr[0], y_gt, self.weight)
+        return bce_loss
 
 
 class BCEWithLogitsLoss(nn.BCEWithLogitsLoss, base.Loss):
