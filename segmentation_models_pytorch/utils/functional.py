@@ -34,14 +34,6 @@ def iou(pr, gt, eps=1e-7, threshold=None, ignore_channels=None):
     intersection = torch.sum(gt * pr)
     union = torch.sum(gt) + torch.sum(pr) - intersection + eps
 
-    #print('\n')
-    #print('-' * 50)
-    #print('gt size 1502', gt.size())
-    #print('pr size', pr.size())
-    #print('gt sum', torch.sum(gt))
-    #print('pr sum', torch.sum(pr))
-    #print('-' * 50)
-
     return (intersection + eps) / union
 
 
@@ -63,17 +55,12 @@ def f_score(pr, gt, beta=1, eps=1e-7, threshold=None, ignore_channels=None):
     pr = _threshold(pr, threshold=threshold)
     pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
 
-    #print('\n')
-    #print('#' * 50)
-    #print('gt size 1502', gt.size())
-    #print('pr size', pr.size())
-    #print('gt * pr', torch.sum(gt * pr))
-    #print('#' * 50)
-    try:
-        tp = torch.sum(gt * pr)
-    except:
-        pr = pr[0]
-        tp = torch.sum(gt * pr)
+    #try:
+        #tp = torch.sum(gt * pr)
+    #except:
+        #pr = pr[0]
+        #tp = torch.sum(gt * pr)
+    tp = torch.sum(gt * pr)
     fp = torch.sum(pr) - tp
     fn = torch.sum(gt) - tp
 

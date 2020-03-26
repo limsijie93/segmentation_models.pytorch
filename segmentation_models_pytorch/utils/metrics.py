@@ -15,13 +15,11 @@ class IoU(base.Metric):
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
-        #print('\n')
-        #print('*' * 50)
-        #print('iou y_pr[0] after activation 1514', y_pr[0].size())
-        #print('iou y_gt after activation 1514', y_gt.size())
-        #print('*' * 50)
+        if isinstance(y_pr, tuple):
+            y_pr = y_pr[0]
+        #print('@', y_pr.size() ,'@')
         return F.iou(
-            y_pr[0], y_gt,
+            y_pr, y_gt,
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
@@ -41,13 +39,11 @@ class Fscore(base.Metric):
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
-        #print('\n')
-        #print('^' * 50)
-        #print('iou y_pr[0] after activation 1514', y_pr[0].size())
-        #print('iou y_gt after activation 1514', y_gt.size())
-        #print('^' * 50)
+        if isinstance(y_pr, tuple):
+            y_pr = y_pr[0]
+        #print('#', y_pr.size() ,'#')
         return F.f_score(
-            y_pr[0], y_gt,
+            y_pr, y_gt,
             eps=self.eps,
             beta=self.beta,
             threshold=self.threshold,
@@ -66,8 +62,10 @@ class Accuracy(base.Metric):
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
+        if isinstance(y_pr, tuple):
+            y_pr = y_pr[0]
         return F.accuracy(
-            y_pr[0], y_gt,
+            y_pr, y_gt,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
         )
@@ -79,14 +77,16 @@ class Recall(base.Metric):
     def __init__(self, eps=1e-7, threshold=0.5, activation=None, ignore_channels=None, **kwargs):
         super().__init__(**kwargs)
         self.eps = eps
-        self.threshold = threshold
+        self.threshold = threshold  
         self.activation = Activation(activation)
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
+        if isinstance(y_pr, tuple):
+            y_pr = y_pr[0]
         return F.recall(
-            y_pr[0], y_gt,
+            y_pr, y_gt,
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
@@ -105,8 +105,10 @@ class Precision(base.Metric):
 
     def forward(self, y_pr, y_gt):
         y_pr = self.activation(y_pr)
+        if isinstance(y_pr, tuple):
+            y_pr = y_pr[0]
         return F.precision(
-            y_pr[0], y_gt,
+            y_pr, y_gt,
             eps=self.eps,
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,

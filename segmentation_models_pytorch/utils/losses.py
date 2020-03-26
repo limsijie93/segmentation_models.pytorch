@@ -14,10 +14,9 @@ class JaccardLoss(base.Loss):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        try:
-            y_pr = self.activation(y_pr)
-        except:
-            y_pr = self.activation(y_pr[0])
+        y_pr = self.activation(y_pr)
+        if isinstance(y_pr, tuple):
+            y_pr = y_pr[0]
         
         jaccard_score = F.jaccard(
             y_pr, y_gt,
@@ -41,11 +40,11 @@ class DiceLoss(base.Loss):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        try:
-            y_pr = self.activation(y_pr)
-        except:
-            y_pr = self.activation(y_pr[0])
+        y_pr = self.activation(y_pr)
+        if isinstance(y_pr, tuple):
+            y_pr = y_pr[0]
         
+        #print('-', y_pr.size() ,'-')
         f1_score = F.f_score(
             y_pr, y_gt,
             beta=self.beta,
@@ -112,13 +111,18 @@ class BCELoss(base.Loss):
         self.ignore_channels = ignore_channels
 
     def forward(self, y_pr, y_gt):
-        try:
-            y_pr = self.activation(y_pr)
-        except:
-            y_pr = self.activation(y_pr[0])
+        y_pr = self.activation(y_pr)
+        if isinstance(y_pr, tuple):
+            y_pr = y_pr[0]
 
-        y_pr = F._threshold(y_pr, threshold=threshold)
-        bce_loss = nn.functional.binary_cross_entropy(y_pr[0], y_gt, self.weight)
+        #print('*', y_pr.size(), '*')
+        #print('*', y_gt.size(), '*')
+        y_pr = F._threshold(y_pr, threshold=self.threshold)
+        y_pr, y_gt = F._take_channels(y_pr, y_gt, ignore_channels=self.ignore_channels)
+
+        #print('*', y_pr.size() ,'*')
+        #print('*', y_gt.size() ,'*')
+        bce_loss = nn.functional.binary_cross_entropy(y_pr, y_gt, self.weight)
         return bce_loss
 
 
